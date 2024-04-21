@@ -1,0 +1,1 @@
+ssh arch@clippycat.ca "cd Grow-Within-Nutrition-Web-App; git pull origin main --rebase; sudo cp  config/gwnapi.service config/gwn.service /etc/systemd/system/; sudo systemctl daemon-reload; sudo systemctl restart gwn"
