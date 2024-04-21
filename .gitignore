@@ -1,0 +1,5 @@
+backend/venv-windows
+backend/venv-linux
+backend/.env
+backend/.flaskenv
+**/__pycache__/

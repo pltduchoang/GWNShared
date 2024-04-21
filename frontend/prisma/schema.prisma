@@ -1,0 +1,189 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Plan {
+  id          Int         @id @default(autoincrement())
+  title       String
+  price       String
+  description String
+  validPeriod String
+  bestValue   Boolean
+  features    String      @db.VarChar(300)
+  isActive    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  subscribers User[]
+}
+
+model User {
+  id                String        @id
+  email             String        @unique
+  firstName         String
+  lastName          String
+  role              Role          @default(user)
+  isActive          Boolean       @default(true)
+  streetAddress     String?
+  city              String?
+  province          Province?
+  postalCode        String?
+  phoneNumber       String?
+  birthday          DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime?     @updatedAt
+  planActivateDate  DateTime?
+  planEndDate       DateTime?
+  plan              Plan?         @relation(fields: [planID], references: [id])
+  planID            Int?
+  subscribeNewsletter Boolean     @default(false)
+  newsletters       Newsletter[]  @relation("createdBy")
+  updatedNewsletters Newsletter[] @relation("updatedBy")
+
+  hostingSessions   MeetingSession[] @relation("hostingBy")
+  createdMeetings   MeetingSession[] @relation("createdByMeetingSession")
+  updatedMeetings   MeetingSession[] @relation("updatedByMeetingSession")
+  attendedSessions  MeetingSession[] @relation("Attendees")
+
+  transactionHistory TransactionHistory[]
+  userForms          UserForm[]
+
+}
+
+enum Role {
+  admin
+  staff
+  subscriber
+  user
+}
+
+enum Province {
+  AB
+  BC
+  MB
+  NB
+  NL
+  NS
+  ON
+  PE
+  QC
+  SK
+  NT
+  NU
+  YT
+}
+
+model Testimony {
+  id            Int      @id @default(autoincrement())
+  author        String
+  content       String
+  profilePicURL String?
+}
+
+model Blog {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  title       String
+  content     String
+  photo       String?
+}
+
+model Newsletter {
+  id           Int      @id @default(autoincrement())
+  title        String
+  content      String   @db.Text
+  imageURL     String?  
+  sentStatus   Boolean  @default(false)
+  createdBy    User?    @relation("createdBy", fields: [createdById], references: [id])
+  createdById  String?
+  updatedBy    User?    @relation("updatedBy", fields: [updatedById], references: [id])
+  updatedById  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model MeetingSession {
+  id            Int       @id @default(autoincrement())
+  title         String
+  content       String?
+  startTime     DateTime
+  endTime       DateTime
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  hostingBy     String
+  createdBy     String
+  updatedBy     String
+  attendeeId    String?    // New field for linking to a single User
+
+  hostingUser   User @relation("hostingBy", fields: [hostingBy], references: [id])
+  createdByUser User @relation("createdByMeetingSession", fields: [createdBy], references: [id])
+  updatedByUser User @relation("updatedByMeetingSession", fields: [updatedBy], references: [id])
+  attendee      User? @relation("Attendees", fields: [attendeeId], references: [id])
+}
+
+model CoachImage {
+  id            Int      @id @default(autoincrement())
+  imageURL      String
+  imageALT      String?
+}
+
+
+model UserForm {
+  id            Int       @id @default(autoincrement())
+  userID        String
+  phone         String?
+  country       String?
+  birthday      DateTime?
+  day           Int?
+  year          Int?
+  month         Int?
+  height        String?
+  currentWeight String?
+  pregnant      Boolean?
+  whyToday      String?
+  wellnessGoals String?
+  weightLossGoal String?
+  weightLossDuration String?
+  familyConditions String?
+  weightLossPrograms String?
+  weightLossExperience String?
+  supportSystem String?
+  activityLevel String?
+  ultimateGoal  String?
+  weightResistanceTraining String?
+  sleep         String?
+  stressLevel   String?
+  eatingHabits  String?
+  mealsPerDay   Int?
+  threeMotivators String?
+  expectations  String?
+  extra         String?
+  hearAboutUs   String?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userID], references: [id])
+}
+
+
+model TransactionHistory {
+  paymentID    String @id
+  userID       String
+  plan         String
+  name         String
+  email        String
+  address      String
+  amount       Float
+  date         DateTime
+  status       String
+  createdAt    DateTime  @default(now())
+
+  user         User      @relation(fields: [userID], references: [id])
+}
